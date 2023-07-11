@@ -1,0 +1,94 @@
+name: Server Production.
+
+env:
+  ACTIONS_RUNNER_DEBUG: true
+  QT_VERSION: 6.4.2 # 5.11.1
+on:
+  push:
+    # branches: [ "main" ]
+  pull_request:
+    # branches: [ "main" ]
+
+jobs:
+  build:
+    name: Server Production Build.
+    runs-on: ubuntu-20.04 # ubuntu-latest
+
+    steps:
+    
+      - name: Env Dump.
+        run: |
+          lsb_release -a
+          sudo apt-get update
+          sudo apt-get install libicu-dev libglu1-mesa-dev libgl1-mesa-dev neofetch
+          neofetch
+          sudo ln -s /usr/lib/x86_64-linux-gnu/libGL.so.1 /usr/lib/libGL.so
+      
+      # Checkout from Master Branch of Main Repository if building for Qt 5.11.1
+      # - name: Clone Server GitHub Repo.
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: ${{ secrets.APP_REPO }}
+      #     token: ${{ secrets.APP_REPO_TOKEN }}
+      #     path: ${{ github.workspace }}
+      #     ref: master
+          
+      # checkout from AppStore Branch of Main repository if building for Qt 6.4.2
+      - name: Clone Server GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.APP_REPO }}
+          token: ${{ secrets.APP_REPO_TOKEN }}
+          path: ${{ github.workspace }}
+          ref: AppStore
+  
+      # - name: Github Clone libscrypt.
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: barrysteyn/node-scrypt # https://github.com/barrysteyn/node-scrypt.git
+      #     path: ${{ github.workspace }}/scrypt
+      #     ref: main
+      
+      # - name: Build libscrypt.
+      #   run: |
+      #     git submodule update --init --recursive
+      #     ls -la ${{ github.workspace }}
+      #     cd ${{ github.workspace }}/node-scrypt
+      #     npm install
+      #     cp build/Release/scrypt_lib.a ../lib/linux/libscrypt.a
+      #     ls -la ../lib/linux/
+          
+      - name: Installing Qt ${{ env.QT_VERSION }}  for Linux.
+        run: |
+          python3 -m pip install aqtinstall==3.1.*
+          python3 -m aqt install-qt --base https://mirrors.ocf.berkeley.edu/qt/ linux desktop ${{ env.QT_VERSION }} gcc_64 -m all --outputdir ${{ github.workspace }}/qtInstall/Qt
+
+      - name: Github Clone Qt-Secret.
+        uses: actions/checkout@v3
+        with:
+          repository: QuasarApp/Qt-Secret # https://github.com/QuasarApp/Qt-Secret
+          path: ${{ github.workspace }}/Qt-Secret/
+
+      - name: Build Qt-Secret.
+        run: |
+          PATH=${{ github.workspace }}/qtInstall/Qt/${{ env.QT_VERSION }}/gcc_64/bin:$PATH
+          export PATH
+          export LD_LIBRARY_PATH=/lib/x86_64-linux-gnu/:${LD_LIBRARY_PATH}
+          ls -la ${{ github.workspace }}/Qt-Secret/
+          cd ${{ github.workspace }}/Qt-Secret/
+          git submodule update --init --recursive
+          ${{ github.workspace }}/qtInstall/Qt/${{ env.QT_VERSION }}/gcc_64/bin/qmake -r DEFINE+=WITHOUT_GUI Qt-Secret.pro CONFIG+=staticlib
+          make
+          ls -la ${{ github.workspace }}/lib/linux/
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/lib/linux/
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/lib/linux/
+
+      - name: Build Server.
+        run: |
+          bash ${{ github.workspace }}/WorkflowUtils/ServerProd/BuildServer.sh
+          
+      # - name: Uploading archive Dir to GH.
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Server_Production_Build
+      #     path: ${{ github.workspace }}/build
