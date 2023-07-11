@@ -4,6 +4,7 @@ env:
   ACTIONS_RUNNER_DEBUG: false
   QT_VERSION: 6.4.2 # 5.11.1
   WORKSPACE: ${{ github.workspace }}
+
 on:
   push:
     branches: [ "main" ]
@@ -20,22 +21,12 @@ jobs:
     
       - name: Env Dump.
         run: |
-          lsb_release -a
           sudo apt-get update
-          sudo apt-get install libicu-dev libglu1-mesa-dev libgl1-mesa-dev neofetch
-          neofetch
+          sudo apt-get install libicu-dev libglu1-mesa-dev libgl1-mesa-dev
           sudo ln -s /usr/lib/x86_64-linux-gnu/libGL.so.1 /usr/lib/libGL.so
       
-      # Checkout from Master Branch of Main if building for Qt 5.11.1
-#       - name: Clone Server GitHub Repo.
-#         uses: actions/checkout@v3
-#         with:
-#           repository: ${{ secrets.APP_REPO }}
-#           token: ${{ secrets.APP_REPO_TOKEN }}
-#           path: ${{ github.workspace }}
-#           ref: master
-          
-      # checkout from AppStore Branch of Main if building for Qt 6.4.2
+      # Checkout from Master Branch of Main Repository if building for Qt 5.11.1
+      # checkout from AppStore Branch of Main repository if building for Qt 6.4.2
       - name: Clone Server GitHub Repo.
         uses: actions/checkout@v3
         with:
@@ -53,7 +44,7 @@ jobs:
       
       - name: Build node-scrypt.
         run: |
-          bash -eux WorkflowUtils/ServerStag/BuildNodeScrypt.sh
+          bash -eux ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildNodeScrypt.sh
           
       - name: Installing Qt ${{ env.QT_VERSION }}  for Linux.
         run: |
@@ -71,20 +62,17 @@ jobs:
           PATH=${{ github.workspace }}/qtInstall/Qt/${{ env.QT_VERSION }}/gcc_64/bin:$PATH
           export PATH
           export LD_LIBRARY_PATH=/lib/x86_64-linux-gnu/:${LD_LIBRARY_PATH}
-          ls -la ${{ github.workspace }}/Qt-Secret/
           cd ${{ github.workspace }}/Qt-Secret/
           git submodule update --init --recursive
           ${{ github.workspace }}/qtInstall/Qt/${{ env.QT_VERSION }}/gcc_64/bin/qmake -r DEFINE+=WITHOUT_GUI Qt-Secret.pro CONFIG+=staticlib
           make
-          ls -la ${{ github.workspace }}/lib/linux/
           sudo rm -rf ${{ github.workspace }}/lib/linux/*so*
           cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/lib/linux/
           cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/lib/linux/
-          ls -la ${{ github.workspace }}/lib/linux/
 
       - name: Build Server.
         run: |
-          bash ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildServer.sh
+          bash -eux ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildServer.sh
           
       # - name: Uploading archive Dir to GH.
       #   uses: actions/upload-artifact@v3

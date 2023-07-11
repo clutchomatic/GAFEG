@@ -1,0 +1,40 @@
+name: Web Staging.
+
+env:
+  ACTIONS_RUNNER_DEBUG: false
+  WORKSPACE: ${{ github.workspace }}
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Web Staging Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Staging Environment Dump.
+        run: |
+          node --version
+          npm --version
+          python3 --version
+      
+      - name: Clone Web GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.WEB_APP_REPO }}
+          token: ${{ secrets.APP_REPO_TOKEN }}
+          path: ${{ github.workspace }}
+
+      - name: Building Web App.
+        run: |
+          bash -eux ${{ github.workspace }}/WorkflowUtils/WebStag/BuildingWebApp.sh
+
+      # - name: Uploading archive Dir to GH.
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Web_Staging_Build
+      #     path: ${{ github.workspace }}/build

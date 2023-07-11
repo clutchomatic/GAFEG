@@ -1,0 +1,40 @@
+name: Dashboard Staging.
+
+env:
+  ACTIONS_RUNNER_DEBUG: false
+  WORKSPACE: ${{ github.workspace }}
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Dashboard Staging Build.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Staging Environment Dump.
+        run: |
+          node --version
+          npm --version
+          python3 --version
+        
+      - name: Clone Dashboard GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.DASHBOARD_REPO }}
+          token: ${{ secrets.APP_REPO_TOKEN }}
+          path: ${{ github.workspace }}
+          
+      - name: Building Dashboard.
+        run: |
+          bash -eux ${{ github.workspace }}/WorkflowUtils/DashboardStag/BuildDashboard.sh
+
+      # - name: Uploading archive Dir to GH.
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Dashboard_Staging_Build
+      #     path: ${{ github.workspace }}
