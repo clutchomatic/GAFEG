@@ -72,7 +72,7 @@ jobs:
 
       - name: Build Server.
         run: |
-          bash -eux ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildServer.sh
+          bash -ex ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildServer.sh
           
       # - name: Uploading archive Dir to GH.
       #   uses: actions/upload-artifact@v3
