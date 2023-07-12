@@ -63,6 +63,12 @@ jobs:
           repository: ${{ secrets.QUICK_REPO }}
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ github.workspace }}/Focus/qml/quickios
+      
+      - name: init quickios submodule.
+        uses: actions/checkout@v3
+        with:
+          repository: benlau/quickios
+          path: ${{ github.workspace }}/Focus/qml/quickios
 
       - name: Clone quiver GitHub Repo.
         uses: actions/checkout@v3
