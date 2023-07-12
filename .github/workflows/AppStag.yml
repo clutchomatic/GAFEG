@@ -87,7 +87,7 @@ jobs:
       - name: Building boost for ios.
         run: |
           cd $APP_PROJECT_DIR/CMake/
-          ./boost.sh --ios-archs 'arm64' -ios --boost-version 1.76.0
+          bash boost.sh --ios-archs 'arm64' -ios --boost-version 1.76.0
           cp -r src/boost_1_76_0/boost ../include/
           cp build/boost/1.76.0/ios/release/build/iphoneos/libboost.a ../lib/ios/
 
