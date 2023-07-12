@@ -49,6 +49,14 @@ jobs:
           npm --version
           python3 --version
 
+      - name: Clone App GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.APP_REPO }}
+          token: ${{ secrets.APP_REPO_TOKEN }}
+          path: ${{ env.APP_REPO_DIR }}
+          ref: AppStore
+
       - name: Set up Temporary Keychain.
         run: |
           security create-keychain -p $KEYCHAIN_PASS $KEYCHAIN_PATH
@@ -59,18 +67,6 @@ jobs:
       - name: Install iOS signing certificate.
         run: |
           bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/InstallCert.sh
-        
-      - name: Installing TestFlight Private API key P8.
-        run: |
-          bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/InstallTestFlightApiKey.sh
-
-      - name: Clone App GitHub Repo.
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ secrets.APP_REPO }}
-          token: ${{ secrets.APP_REPO_TOKEN }}
-          path: ${{ env.APP_REPO_DIR }}
-          ref: AppStore
           
       - name: Setting up App Config INI.
         run: |
@@ -133,6 +129,10 @@ jobs:
 #         with:
 #           name: iOS_App_Staging
 #           path: ${{ env.APP_ARTIFACT_DIR }}
+
+      - name: Installing TestFlight Private API key P8.
+        run: |
+          bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/InstallTestFlightApiKey.sh
 
       - name: Uploading to TestFlight.
         run: |
