@@ -59,7 +59,6 @@ jobs:
 
       - name: Set up Temporary Keychain.
         run: |
-          git submodule update --init --recursive
           security create-keychain -p $KEYCHAIN_PASS $KEYCHAIN_PATH
           security default-keychain -s $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
@@ -113,6 +112,7 @@ jobs:
       - name: Running Cmake - to generate xcproj.
         run: |
           cd $APP_PROJECT_DIR
+          git submodule update --init --recursive
           bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/CmakeCommand.sh
 
       - name: Running XCode - to generate xcarchive.
