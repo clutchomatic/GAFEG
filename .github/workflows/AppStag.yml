@@ -59,6 +59,7 @@ jobs:
 
       - name: Set up Temporary Keychain.
         run: |
+          git submodule update --init --recursive
           security create-keychain -p $KEYCHAIN_PASS $KEYCHAIN_PATH
           security default-keychain -s $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
