@@ -56,11 +56,22 @@ jobs:
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ env.APP_REPO_DIR }}
           ref: AppStore
+    
+      - name: Clone quick ios GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.QUICK_REPO }}
+          token: ${{ secrets.APP_REPO_TOKEN }}
+          path: ${{ github.workspace }}/Focus/qml/quickios
+
+      - name: Clone quiver GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: quiverproject/quiver
+          path: ${{ github.workspace }}/Focus/Quiver
 
       - name: Set up Temporary Keychain.
         run: |
-          git config --global user.name "eye-ink"
-          git submodule update --init --recursive
           security create-keychain -p $KEYCHAIN_PASS $KEYCHAIN_PATH
           security default-keychain -s $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
