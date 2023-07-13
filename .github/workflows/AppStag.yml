@@ -55,26 +55,27 @@ jobs:
           repository: ${{ secrets.APP_REPO }}
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ env.APP_REPO_DIR }}
+          submodules: recursive
           ref: AppStore
     
-      - name: Clone quick ios GitHub Repo.
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ secrets.QUICK_REPO }}
-          token: ${{ secrets.APP_REPO_TOKEN }}
-          path: ${{ github.workspace }}/Focus/qml/quickios
+      # - name: Clone quick ios GitHub Repo.
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: ${{ secrets.QUICK_REPO }}
+      #     token: ${{ secrets.APP_REPO_TOKEN }}
+      #     path: ${{ github.workspace }}/Focus/qml/quickios
       
-      - name: init quickios submodule.
-        uses: actions/checkout@v3
-        with:
-          repository: benlau/quickios
-          path: ${{ github.workspace }}/Focus/qml/quickios
+      # - name: init quickios submodule.
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: benlau/quickios
+      #     path: ${{ github.workspace }}/Focus/qml/quickios
 
-      - name: Clone quiver GitHub Repo.
-        uses: actions/checkout@v3
-        with:
-          repository: quiverproject/quiver
-          path: ${{ github.workspace }}/Focus/Quiver
+      # - name: Clone quiver GitHub Repo.
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: quiverproject/quiver
+      #     path: ${{ github.workspace }}/Focus/Quiver
 
       - name: Set up Temporary Keychain.
         run: |
@@ -85,11 +86,11 @@ jobs:
 
       - name: Install iOS signing certificate.
         run: |
-          bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/InstallCert.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/InstallCert.sh
           
       - name: Setting up App Config INI.
         run: |
-          bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/ConfigureIni.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/ConfigureIni.sh
 
       - name: Clone Web GitHub Repo.
         uses: actions/checkout@v3
@@ -101,7 +102,7 @@ jobs:
       - name: Building Web App.
         run: |
           cd $WEB_PROJECT_DIR
-          bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/BuildWeb.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/BuildWeb.sh
 
       - name: Building boost for ios.
         run: |
@@ -131,17 +132,17 @@ jobs:
       - name: Running Cmake - to generate xcproj.
         run: |
           cd $APP_PROJECT_DIR
-          bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/CmakeCommand.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/CmakeCommand.sh
 
       - name: Running XCode - to generate xcarchive.
         run: |
           cd $APP_BUILD_DIR
-          bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/XcarchiveCommand.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/XcarchiveCommand.sh
 
       - name: Running XCode - to generate ipa.
         run: |
           cd $APP_BUILD_DIR
-          bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/XcodebuildCommand.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/XcodebuildCommand.sh
 
 #       - name: Uploading archive Dir to GH.
 #         uses: actions/upload-artifact@v3
@@ -151,7 +152,7 @@ jobs:
 
       - name: Installing TestFlight Private API key P8.
         run: |
-          bash -eux ${{ github.workspace }}/WorkflowUtils/AppStag/InstallTestFlightApiKey.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/InstallTestFlightApiKey.sh
 
       - name: Uploading to TestFlight.
         run: |
