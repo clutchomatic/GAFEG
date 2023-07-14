@@ -55,7 +55,6 @@ jobs:
           repository: ${{ secrets.APP_REPO }}
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ env.APP_REPO_DIR }}
-          submodules: recursive
           ref: AppStore
     
       # - name: Clone quick ios GitHub Repo.
@@ -65,17 +64,17 @@ jobs:
       #     token: ${{ secrets.APP_REPO_TOKEN }}
       #     path: ${{ github.workspace }}/Focus/qml/quickios
       
-      # - name: init quickios submodule.
-      #   uses: actions/checkout@v3
-      #   with:
-      #     repository: benlau/quickios
-      #     path: ${{ github.workspace }}/Focus/qml/quickios
+      - name: init quickios submodule.
+        uses: actions/checkout@v3
+        with:
+          repository: benlau/quickios
+          path: ${{ github.workspace }}/Focus/qml/quickios
 
-      # - name: Clone quiver GitHub Repo.
-      #   uses: actions/checkout@v3
-      #   with:
-      #     repository: quiverproject/quiver
-      #     path: ${{ github.workspace }}/Focus/Quiver
+      - name: Clone quiver GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: quiverproject/quiver
+          path: ${{ github.workspace }}/Focus/Quiver
 
       - name: Set up Temporary Keychain.
         run: |

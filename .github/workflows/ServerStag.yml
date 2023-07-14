@@ -44,7 +44,7 @@ jobs:
       
       - name: Build node-scrypt.
         run: |
-          bash -eux ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildNodeScrypt.sh
+          bash ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildNodeScrypt.sh
           
       - name: Installing Qt ${{ env.QT_VERSION }}  for Linux.
         run: |
@@ -72,7 +72,7 @@ jobs:
 
       - name: Build Server.
         run: |
-          bash -ex ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildServer.sh
+          bash ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildServer.sh
           
       # - name: Uploading archive Dir to GH.
       #   uses: actions/upload-artifact@v3
