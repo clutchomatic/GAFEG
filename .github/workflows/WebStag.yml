@@ -31,7 +31,7 @@ jobs:
 
       - name: Building Web App.
         run: |
-          bash -eux ${{ github.workspace }}/WorkflowUtils/WebStag/BuildingWebApp.sh
+          bash ${{ github.workspace }}/WorkflowUtils/WebStag/BuildingWebApp.sh
 
       # - name: Uploading archive Dir to GH.
       #   uses: actions/upload-artifact@v3
