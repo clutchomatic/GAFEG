@@ -79,3 +79,4 @@ jobs:
         with:
           name: Server_Staging_Build
           path: ${{ github.workspace }}
+          exclude: ${{ github.workspace }}/qtInstall
