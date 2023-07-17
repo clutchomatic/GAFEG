@@ -74,8 +74,8 @@ jobs:
         run: |
           bash ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildServer.sh
           
-      # - name: Uploading archive Dir to GH.
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Server_Staging_Build
-      #     path: ${{ github.workspace }}/build
+      - name: Uploading archive Dir to GH.
+        uses: actions/upload-artifact@v3
+        with:
+          name: Server_Staging_Build
+          path: ${{ github.workspace }}
