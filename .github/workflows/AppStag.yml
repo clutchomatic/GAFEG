@@ -14,8 +14,6 @@ env:
   TESTFLIGHT_API_KEY: ${{ secrets.TESTFLIGHT_API_KEY }}
   TESTFLIGHT_API_KEY_NAME: ${{ secrets.TESTFLIGHT_API_KEY_NAME }}
   TESTFLIGHT_API_ISSUER: ${{ secrets.TESTFLIGHT_API_ISSUER }}
-  TESTFLIGHT_USERNAME: ${{ secrets.TESTFLIGHT_USERNAME }}
-  TESTFLIGHT_PASSWORD: ${{ secrets.TESTFLIGHT_PASSWORD }}
   
   WORKSPACE: ${{ github.workspace }}
 
@@ -23,6 +21,7 @@ env:
   APP_PROJECT_DIR: ${{ github.workspace }}/
   APP_BUILD_DIR: ${{ github.workspace }}/build/
   APP_ARTIFACT_DIR: ${{ github.workspace }}/build/artifacts
+  APP_PATH: ${{ github.workspace }}/build/artifacts/Focus.ipa
   
   WEB_REPO_DIR: ${{ github.workspace }}/web_app/
   WEB_PROJECT_DIR: ${{ github.workspace }}/web_app/

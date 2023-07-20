@@ -1,0 +1,181 @@
+name: Focus App Production. 
+env:
+  ACTIONS_RUNNER_DEBUG: true
+  QT_MAC_DIR: ${{ github.workspace }}/qtInstall/Qt/6.4.2/macos 
+  QT_IOS_DIR: ${{ github.workspace }}/qtInstall/Qt/6.4.2/ios
+  
+  KEYCHAIN_PATH: ~/Library/Keychains/build.keychain-db
+  KEYCHAIN_PASS: ${{ secrets.KEYCHAIN_PASSWORD }}
+  
+  IOS_CERT: ${{ secrets.IOS_CERTIFICATE_STAG_DIST }}
+  IOS_CERT_PASS: ""
+  IOS_PROF: ${{ secrets.IOS_PROVISIONING_PROFILE_PROD_DIST }}
+
+  TESTFLIGHT_API_KEY_NAME: ${{ secrets.TESTFLIGHT_API_KEY_NAME }}
+  TESTFLIGHT_API_KEY: ${{ secrets.TESTFLIGHT_API_KEY }}
+  TESTFLIGHT_API_ISSUER: ${{ secrets.TESTFLIGHT_API_ISSUER }}
+  
+  WORKSPACE: ${{ github.workspace }}
+
+  APP_REPO_DIR: ${{ github.workspace }}
+  APP_PROJECT_DIR: ${{ github.workspace }}/
+  APP_BUILD_DIR: ${{ github.workspace }}/build/
+  APP_ARTIFACT_DIR: ${{ github.workspace }}/build/artifacts
+  APP_PATH: ${{ github.workspace }}/build/artifacts/Focus.ipa
+  
+  WEB_REPO_DIR: ${{ github.workspace }}/web_app/
+  WEB_PROJECT_DIR: ${{ github.workspace }}/web_app/
+  WEB_BUILD_DIR: ${{ github.workspace }}/web_app/build/
+  WEB_ARTIFACT_DIR: ${{ github.workspace }}/web_app/build/
+  
+on:
+  push:
+    branches:
+      - "AppStore"
+  pull_request:
+    branches:
+      - "AppStore"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ios Production Build
+    runs-on: macos-latest
+    steps:
+      - name: Production Environment Dump.
+        run: |
+          brew install tree
+          xcodebuild -version
+          node --version
+          npm --version
+          python3 --version
+
+          echo "########################################################################################"
+          echo "RUNNER_TEMP: ${{ runner.temp }}"
+          echo "github.ref: ${{ github.ref }}"
+
+          echo "QT_MAC_DIR: $QT_MAC_DIR"
+          echo "QT_IOS_DIR: $QT_IOS_DIR"
+
+          echo "KEYCHAIN_PATH: $KEYCHAIN_PATH"
+          echo "KEYCHAIN_PASS: $KEYCHAIN_PASS"
+
+          echo "IOS_CERT: $IOS_CERT"
+          echo "IOS_CERT_PASS: $IOS_CERT_PASS"
+          echo "IOS_PROF: $IOS_PROF"
+          echo "TESTFLIGHT_API_KEY_NAME: " $TESTFLIGHT_API_KEY_NAME
+
+          echo "WORKSPACE_DIR: $WORKSPACE_DIR"
+          echo "APP_REPO_DIR: $APP_REPO_DIR"
+          echo "APP_PROJECT_DIR: $APP_PROJECT_DIR"
+          echo "APP_BUILD_DIR: $APP_BUILD_DIR"
+          echo "APP_ARTIFACT_DIR: $APP_ARTIFACT_DIR"
+
+          echo "WEB_REPO_DIR: $WEB_REPO_DIR"
+          echo "WEB_PROJECT_DIR: $WEB_PROJECT_DIR"
+          echo "WEB_BUILD_DIR: $WEB_BUILD_DIR"
+          echo "WEB_ARTIFACT_DIR: $WEB_ARTIFACT_DIR"
+          echo "########################################################################################"
+
+      - name: Clone App GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: eyeguide/focus
+          token: ${{ secrets.APP_REPO_TOKEN }}
+          path: ${{ env.APP_REPO_DIR }}
+          ref: AppStore
+
+      - name: init quickios submodule.
+        uses: actions/checkout@v3
+        with:
+          repository: benlau/quickios
+          path: ${{ github.workspace }}/Focus/qml/quickios
+
+      - name: Clone quiver GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: quiverproject/quiver
+          path: ${{ github.workspace }}/Focus/Quiver
+
+      - name: Set up Temporary Keychain.
+        run: |
+          security create-keychain -p $KEYCHAIN_PASS $KEYCHAIN_PATH
+          security default-keychain -s $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p $KEYCHAIN_PASS $KEYCHAIN_PATH
+
+      - name: Install iOS signing certificate.
+        run: |
+          bash ${{ github.workspace }}/WorkflowUtils/AppProd/InstallCert.sh
+          cat Eyeguide_Distribution_All_Platforms_Prod.mobileprovision
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ 
+          
+      - name: Setting up App Config INI.
+        run: |
+          bash ${{ github.workspace }}/WorkflowUtils/AppProd/ConfigureIni.sh
+
+      - name: Clone Web GitHub Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: eyeguide/focus-web
+          token: ${{ secrets.APP_REPO_TOKEN }}
+          path: ${{ env.WEB_REPO_DIR }}
+
+      - name: Building Web App.
+        run: |
+          cd $WEB_PROJECT_DIR
+          bash ${{ github.workspace }}/WorkflowUtils/AppProd/BuildWeb.sh
+
+      - name: Building boost for ios.
+        run: |
+          cd $APP_PROJECT_DIR/CMake/
+          bash boost.sh --ios-archs 'arm64' -ios --boost-version 1.76.0
+          cp -r src/boost_1_76_0/boost ../include/
+          cp build/boost/1.76.0/ios/release/build/iphoneos/libboost.a ../lib/ios/
+
+      - name: Install Qt for mac.
+        run: |
+          python3 -m pip install aqtinstall==3.1.*
+          aqt install-qt mac desktop 6.4.2 clang_64 --outputdir ${{ github.workspace }}/qtInstall/Qt
+
+      - name: Install Qt for iOS.
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: '==3.1.*'
+          py7zrversion: '>=0.20.2'
+          version: '6.4.2'
+          host: 'mac'
+          target: 'ios'
+          arch: 'ios'
+          dir: '${{ github.workspace }}/qtInstall/'
+          modules: 'qtcharts qtconnectivity qthttpserver qtimageformats qtmultimedia qtnetworkauth qtpdf qtpositioning qtremoteobjects qtwebchannel qtwebsockets qtwebview qtquicktimeline qtshadertools'
+          archives: 'qttranslations qttools qtsvg qtdeclarative qtbase'
+
+      - name: Running Cmake - to generate xcproj.
+        run: |
+          cd $APP_PROJECT_DIR
+          bash ${{ github.workspace }}/WorkflowUtils/AppProd/CmakeCommand.sh
+
+      - name: Running XCode - to generate xcarchive.
+        run: |
+          cd $APP_BUILD_DIR
+          bash ${{ github.workspace }}/WorkflowUtils/AppProd/XcarchiveCommand.sh
+
+      - name: Running XCode - to generate ipa.
+        run: |
+          cd $APP_BUILD_DIR
+          bash ${{ github.workspace }}/WorkflowUtils/AppProd/XcodebuildCommand.sh
+
+#       - name: Uploading archive Dir to GH.
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: iOS_App_Production
+#           path: ${{ env.APP_ARTIFACT_DIR }}
+
+      - name: Installing TestFlight Private API key P8.
+        run: |
+          bash ${{ github.workspace }}/WorkflowUtils/AppProd/InstallTestFlightApiKey.sh
+
+      - name: Uploading to TestFlight.
+        run: |
+          xcrun altool --upload-app --type ios -f ${APP_PATH} --apiKey ${TESTFLIGHT_API_KEY_NAME} --apiIssuer ${TESTFLIGHT_API_ISSUER}
