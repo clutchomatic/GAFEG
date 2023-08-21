@@ -77,7 +77,9 @@ jobs:
       - name: Checking in libs for Server.
         run: |
           cd ${{ github.workspace }}
+          git config --global user.name "eye-ink"
+          git config --global user.email "rjain@cybercraft.llc"
           git status
           git commit -m "$(date +'%Y-%m-%d %H:%M:%S') - Build Server Libs from GitHub Actions Script." ${{ github.workspace }}/lib/linux/*
-          git push origin main
+          git push origin $GITHUB_REF
 
