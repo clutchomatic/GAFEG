@@ -74,5 +74,10 @@ jobs:
           cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/lib/linux/
           cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/lib/linux/
 
-      # - name: Checking in libs for iOS.
-      #   run: |
+      - name: Checking in libs for Server.
+        run: |
+          cd ${{ github.workspace }}
+          git status
+          git commit -m "$(date +'%Y-%m-%d %H:%M:%S') - Build Server Libs from GitHub Actions Script." ${{ github.workspace }}/lib/linux/*
+          git push origin main
+
