@@ -70,11 +70,11 @@ jobs:
           git submodule update --init --recursive
           ${{ github.workspace }}/qtInstall/Qt/${{ env.QT_VERSION }}/gcc_64/bin/qmake -r DEFINE+=WITHOUT_GUI Qt-Secret.pro CONFIG+=staticlib
           make
-          ls -la .
+          ls -la ${{ github.workspace }}/lib/linux/
           sudo rm -rf ${{ github.workspace }}/lib/linux/*so*
           cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/lib/linux/
           cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/lib/linux/
-          ls -la .
+          ls -la ${{ github.workspace }}/lib/linux/
 
       - name: Checking in libs for Server.
         run: |
