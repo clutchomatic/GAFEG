@@ -90,7 +90,7 @@ jobs:
           git config --global user.name "eye-ink"
           git config --global user.email "rjain@cybercraft.llc"
           git status
-          git add .
+          git add *
           git commit -m "$(date +'%Y-%m-%d %H:%M:%S') - Build Server Libs from GitHub Actions Script." "${{ github.workspace }}/GAFEG/lib/linux/*.a"
           git push origin main
 
