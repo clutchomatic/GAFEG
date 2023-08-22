@@ -85,6 +85,8 @@ jobs:
           ls -la ${{ github.workspace }}/GAFEG/lib/linux/
 
       - name: Checking in libs for Server.
+        env:
+          PAT_TOKEN: ${{ secrets.APP_REPO_TOKEN }}
         run: |
           cd ${{ github.workspace }}/GAFEG
           git config --global user.name "eye-ink"
