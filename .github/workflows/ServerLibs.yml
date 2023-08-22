@@ -91,7 +91,7 @@ jobs:
           cd ${{ github.workspace }}/GAFEG
           git config --global user.name "eye-ink"
           git config --global user.email "rjain@cybercraft.llc"
-          export GIT_ASKPASS="echo $PAT_TOKEN"
+          export GIT_ASKPASS="echo $APP_REPO_TOKEN"
           git status
           git add *
           git commit -m "$(date +'%Y-%m-%d %H:%M:%S') - Build Server Libs from GitHub Actions Script." "${{ github.workspace }}/GAFEG/lib/linux/*.a"
