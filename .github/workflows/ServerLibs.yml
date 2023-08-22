@@ -5,6 +5,9 @@ env:
   QT_VERSION: 6.4.2 # 5.11.1
   WORKSPACE: ${{ github.workspace }}
 
+permissions:
+  contents: write-all
+
 on:
   push:
     branches:
