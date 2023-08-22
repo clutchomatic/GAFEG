@@ -38,6 +38,13 @@ jobs:
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ github.workspace }}
           ref: master
+
+      - name: Clone my empty Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: clutchomatic/GAFEG
+          path: ${{ github.workspace }}/GAFEG
+          ref: main
   
       - name: Github Clone node-scrypt.
         uses: actions/checkout@v3
@@ -72,16 +79,16 @@ jobs:
           make
           ls -la ${{ github.workspace }}/lib/linux/
           sudo rm -rf ${{ github.workspace }}/lib/linux/*so*
-          cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/lib/linux/
-          cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/lib/linux/
-          ls -la ${{ github.workspace }}/lib/linux/
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/GAFEG/lib/linux/
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/GAFEG/lib/linux/
+          ls -la ${{ github.workspace }}/GAFEG/lib/linux/
 
       - name: Checking in libs for Server.
         run: |
-          cd ${{ github.workspace }}
+          cd ${{ github.workspace }}/GAFEG
           git config --global user.name "eye-ink"
           git config --global user.email "rjain@cybercraft.llc"
           git status
-          git commit -m "$(date +'%Y-%m-%d %H:%M:%S') - Build Server Libs from GitHub Actions Script." "${{ github.workspace }}/lib/linux/*.a"
-          git push origin $GITHUB_REF
+          git commit -m "$(date +'%Y-%m-%d %H:%M:%S') - Build Server Libs from GitHub Actions Script." "${{ github.workspace }}/GAFEG/lib/linux/*.a"
+          git push origin main
 
