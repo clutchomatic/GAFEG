@@ -79,6 +79,7 @@ jobs:
           make
           ls -la ${{ github.workspace }}/lib/linux/
           sudo rm -rf ${{ github.workspace }}/lib/linux/*so*
+          mkdir -p ${{ github.workspace }}/GAFEG/lib/linux/
           cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/GAFEG/lib/linux/
           cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/GAFEG/lib/linux/
           ls -la ${{ github.workspace }}/GAFEG/lib/linux/
