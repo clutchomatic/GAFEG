@@ -9,7 +9,10 @@ env:
   APP_REPO_DIR: ${{ github.workspace }}
   APP_PROJECT_DIR: ${{ github.workspace }}/
   APP_BUILD_DIR: ${{ github.workspace }}/build/
-  
+
+permissions:
+  contents: write
+
 on:
   push:
     branches:
@@ -84,5 +87,15 @@ jobs:
       # - name: Building Qt-secret for iOS.
       #   run: |
 
-      # - name: Checking in libs for iOS.
-      #   run: |
+      - name: Checking in libs for Server.
+        env:
+          PAT_TOKEN: ${{ secrets.APP_REPO_TOKEN }}
+        run: |
+          cd ${{ github.workspace }}/GAFEG
+          git config --global user.name "eye-ink"
+          git config --global user.email "rjain@cybercraft.llc"
+          export GIT_ASKPASS="echo $APP_REPO_TOKEN"
+          git status
+          git add *
+          git commit -m "$(date +'%Y-%m-%d %H:%M:%S') - Build Server Libs from GitHub Actions Script." "${{ github.workspace }}/GAFEG/lib/linux/*.a"
+          git push origin main
