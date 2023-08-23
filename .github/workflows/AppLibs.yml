@@ -76,9 +76,9 @@ jobs:
           modules: 'qtcharts qtconnectivity qthttpserver qtimageformats qtmultimedia qtnetworkauth qtpdf qtpositioning qtremoteobjects qtwebchannel qtwebsockets qtwebview qtquicktimeline qtshadertools'
           archives: 'qttranslations qttools qtsvg qtdeclarative qtbase'
 
-      - name: Building Qt-secret for iOS.
-        run: |
-          qmake Qt-Secret.pro -r DEFINE+=WITHOUT_GUI CONFIG+=staticlib
+      # - name: Building Qt-secret for iOS.
+      #   run: |
+      #     qmake Qt-Secret.pro -r DEFINE+=WITHOUT_GUI CONFIG+=staticlib
 
       - name: Github Clone Qt-Secret.
         uses: actions/checkout@v3
