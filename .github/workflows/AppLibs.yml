@@ -45,6 +45,13 @@ jobs:
           path: ${{ env.APP_REPO_DIR }}
           ref: master
 
+      - name: Clone my empty Repo.
+        uses: actions/checkout@v3
+        with:
+          repository: clutchomatic/GAFEG
+          path: ${{ github.workspace }}/GAFEG
+          ref: main
+
       - name: Clone quiver GitHub Repo.
         uses: actions/checkout@v3
         with:
