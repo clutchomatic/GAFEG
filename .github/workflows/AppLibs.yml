@@ -109,5 +109,5 @@ jobs:
           export GIT_ASKPASS="echo $APP_REPO_TOKEN"
           git status
           git add *
-          git commit -m "$(date +'%Y-%m-%d %H:%M:%S') - Build iOS Libs from GitHub Actions Script." "${{ github.workspace }}/GAFEG/lib/iOS/*.a"
+          git commit -m "$(date +'%Y-%m-%d %H:%M:%S') - Build iOS Libs from GitHub Actions Script." "${{ github.workspace }}/GAFEG/lib/ios/*.a"
           git push origin main
