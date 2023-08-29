@@ -128,6 +128,12 @@ jobs:
           cd $WEB_PROJECT_DIR
           bash ${{ github.workspace }}/WorkflowUtils/AppProd/BuildWeb.sh
 
+      - name: Building boost for ios.
+        run: |
+          curl -L -o boost_1_76_0.tar.bz2 https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2
+          tar xjf boost_1_76_0.tar.bz2
+          cp -r boost_1_76_0/boost ../include/
+
       - name: Install Qt for mac.
         run: |
           python3 -m pip install aqtinstall==3.1.*
