@@ -63,12 +63,6 @@ jobs:
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ github.workspace }}/Focus/qml/quickios
           ref: qt6_quickios
-      
-      # - name: init quickios submodule.
-      #   uses: actions/checkout@v3
-      #   with:
-      #     repository: benlau/quickios
-      #     path: ${{ github.workspace }}/Focus/qml/quickios
 
       - name: Clone quiver GitHub Repo.
         uses: actions/checkout@v3
@@ -102,13 +96,6 @@ jobs:
         run: |
           cd $WEB_PROJECT_DIR
           bash ${{ github.workspace }}/WorkflowUtils/AppStag/BuildWeb.sh
-
-      - name: Building boost for ios.
-        run: |
-          cd $APP_PROJECT_DIR/CMake/
-          bash boost.sh --ios-archs 'arm64' -ios --boost-version 1.76.0
-          cp -r src/boost_1_76_0/boost ../include/
-          cp build/boost/1.76.0/ios/release/build/iphoneos/libboost.a ../lib/ios/
 
       - name: Install Qt for mac.
         run: |

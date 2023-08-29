@@ -33,11 +33,41 @@ jobs:
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ github.workspace }}
           ref: AppStore
+  
+      - name: Github Clone node-scrypt.
+        uses: actions/checkout@v3
+        with:
+          repository: barrysteyn/node-scrypt # https://github.com/barrysteyn/node-scrypt.git
+          path: ${{ github.workspace }}/scrypt
+          ref: v1.2.0
+      
+      - name: Build node-scrypt.
+        run: |
+          bash ${{ github.workspace }}/WorkflowUtils/ServerStag/BuildNodeScrypt.sh
           
       - name: Installing Qt ${{ env.QT_VERSION }}  for Linux.
         run: |
           python3 -m pip install aqtinstall==3.1.*
           python3 -m aqt install-qt --base https://mirrors.ocf.berkeley.edu/qt/ linux desktop ${{ env.QT_VERSION }} gcc_64 -m all --outputdir ${{ github.workspace }}/qtInstall/Qt
+
+      - name: Github Clone Qt-Secret.
+        uses: actions/checkout@v3
+        with:
+          repository: QuasarApp/Qt-Secret # https://github.com/QuasarApp/Qt-Secret
+          path: ${{ github.workspace }}/Qt-Secret/
+
+      - name: Build Qt-Secret.
+        run: |
+          PATH=${{ github.workspace }}/qtInstall/Qt/${{ env.QT_VERSION }}/gcc_64/bin:$PATH
+          export PATH
+          export LD_LIBRARY_PATH=/lib/x86_64-linux-gnu/:${LD_LIBRARY_PATH}
+          cd ${{ github.workspace }}/Qt-Secret/
+          git submodule update --init --recursive
+          ${{ github.workspace }}/qtInstall/Qt/${{ env.QT_VERSION }}/gcc_64/bin/qmake -r DEFINE+=WITHOUT_GUI Qt-Secret.pro CONFIG+=staticlib
+          make
+          sudo rm -rf ${{ github.workspace }}/lib/linux/*so*
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/lib/linux/
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/lib/linux/
 
       - name: Build Server.
         run: |

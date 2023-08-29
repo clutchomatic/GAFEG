@@ -1,4 +1,4 @@
-name: Focus App Production. 
+name: Focus App Production Full Build. 
 env:
   ACTIONS_RUNNER_DEBUG: true
   QT_MAC_DIR: ${{ github.workspace }}/qtInstall/Qt/6.4.2/macos 
@@ -39,7 +39,7 @@ on:
 
 jobs:
   build:
-    name: ios Production Build
+    name: ios Production Full Build.
     runs-on: macos-latest
     steps:
       - name: Production Environment Dump.
@@ -128,6 +128,13 @@ jobs:
           cd $WEB_PROJECT_DIR
           bash ${{ github.workspace }}/WorkflowUtils/AppProd/BuildWeb.sh
 
+      - name: Building boost for ios.
+        run: |
+          cd $APP_PROJECT_DIR/CMake/
+          bash boost.sh --ios-archs 'arm64' -ios --boost-version 1.76.0
+          cp -r src/boost_1_76_0/boost ../include/
+          cp build/boost/1.76.0/ios/release/build/iphoneos/libboost.a ../lib/ios/
+
       - name: Install Qt for mac.
         run: |
           python3 -m pip install aqtinstall==3.1.*
@@ -145,6 +152,25 @@ jobs:
           dir: '${{ github.workspace }}/qtInstall/'
           modules: 'qtcharts qtconnectivity qthttpserver qtimageformats qtmultimedia qtnetworkauth qtpdf qtpositioning qtremoteobjects qtwebchannel qtwebsockets qtwebview qtquicktimeline qtshadertools'
           archives: 'qttranslations qttools qtsvg qtdeclarative qtbase'
+
+      - name: Github Clone Qt-Secret.
+        uses: actions/checkout@v3
+        with:
+          repository: QuasarApp/Qt-Secret # https://github.com/QuasarApp/Qt-Secret
+          path: ${{ github.workspace }}/Qt-Secret/
+
+      - name: Building Qt-secret for iOS.
+        run: |
+          cd ${{ github.workspace }}/Qt-Secret/
+          git submodule update --init --recursive
+          ${{ github.workspace }}/qtInstall/Qt/6.4.2/ios/bin/qmake -r DEFINE+=WITHOUT_GUI Qt-Secret.pro CONFIG+=staticlib
+          make
+          ls -la ${{ github.workspace }}/lib/ios/
+          sudo rm -rf ${{ github.workspace }}/lib/ios/*so*
+          mkdir -p ${{ github.workspace }}/lib/ios/
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/lib/ios/
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/lib/ios/
+          ls -la ${{ github.workspace }}/lib/ios/
 
       - name: Running Cmake - to generate xcproj.
         run: |

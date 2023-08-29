@@ -1,4 +1,4 @@
-name: Focus App Production. 
+name: App Staging. 
 env:
   ACTIONS_RUNNER_DEBUG: true
   QT_MAC_DIR: ${{ github.workspace }}/qtInstall/Qt/6.4.2/macos 
@@ -9,10 +9,10 @@ env:
   
   IOS_CERT: ${{ secrets.IOS_CERTIFICATE_STAG_DIST }}
   IOS_CERT_PASS: ""
-  IOS_PROF: ${{ secrets.IOS_PROVISIONING_PROFILE_PROD_DIST }}
-
-  TESTFLIGHT_API_KEY_NAME: ${{ secrets.TESTFLIGHT_API_KEY_NAME }}
+  IOS_PROF: ${{ secrets.IOS_PROVISIONING_PROFILE_STAG_DIST }}
+  
   TESTFLIGHT_API_KEY: ${{ secrets.TESTFLIGHT_API_KEY }}
+  TESTFLIGHT_API_KEY_NAME: ${{ secrets.TESTFLIGHT_API_KEY_NAME }}
   TESTFLIGHT_API_ISSUER: ${{ secrets.TESTFLIGHT_API_ISSUER }}
   
   WORKSPACE: ${{ github.workspace }}
@@ -31,18 +31,20 @@ env:
 on:
   push:
     branches:
+      - "master"
       - "AppStore"
   pull_request:
     branches:
+      - "master"
       - "AppStore"
   workflow_dispatch:
 
 jobs:
   build:
-    name: ios Production Build
+    name: ios Staging Build
     runs-on: macos-latest
     steps:
-      - name: Production Environment Dump.
+      - name: Staging Environment Dump.
         run: |
           brew install tree
           xcodebuild -version
@@ -83,15 +85,21 @@ jobs:
           repository: eyeguide/focus
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ env.APP_REPO_DIR }}
-          ref: AppStore
-
+          ref: master
+    
       - name: Clone quick ios GitHub Repo.
         uses: actions/checkout@v3
         with:
           repository: eyeguide/quickios
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ github.workspace }}/Focus/qml/quickios
-          ref: qt6_quickios
+          ref: qt6_quickios 
+      
+      # - name: clone quickios submodule.
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: benlau/quickios
+      #     path: ${{ github.workspace }}/Focus/qml/quickios
 
       - name: Clone quiver GitHub Repo.
         uses: actions/checkout@v3
@@ -101,20 +109,20 @@ jobs:
 
       - name: Set up Temporary Keychain.
         run: |
-          security create-keychain -p $KEYCHAIN_PASS $KEYCHAIN_PATH
-          security default-keychain -s $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p $KEYCHAIN_PASS $KEYCHAIN_PATH
+          security create-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN_PATH"
 
       - name: Install iOS signing certificate.
         run: |
-          bash ${{ github.workspace }}/WorkflowUtils/AppProd/InstallCert.sh
-          cat Eyeguide_Distribution_All_Platforms_Prod.mobileprovision
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/InstallCert.sh
+          cat Eyeguide_Distribution_All_Platforms.mobileprovision
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ 
           
       - name: Setting up App Config INI.
         run: |
-          bash ${{ github.workspace }}/WorkflowUtils/AppProd/ConfigureIni.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/ConfigureIni.sh
 
       - name: Clone Web GitHub Repo.
         uses: actions/checkout@v3
@@ -126,7 +134,14 @@ jobs:
       - name: Building Web App.
         run: |
           cd $WEB_PROJECT_DIR
-          bash ${{ github.workspace }}/WorkflowUtils/AppProd/BuildWeb.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/BuildWeb.sh
+
+      - name: Building boost for ios.
+        run: |
+          cd $APP_PROJECT_DIR/CMake/
+          bash boost.sh --ios-archs 'arm64' -ios --boost-version 1.76.0
+          cp -r src/boost_1_76_0/boost ../include/
+          cp build/boost/1.76.0/ios/release/build/iphoneos/libboost.a ../lib/ios/
 
       - name: Install Qt for mac.
         run: |
@@ -146,30 +161,49 @@ jobs:
           modules: 'qtcharts qtconnectivity qthttpserver qtimageformats qtmultimedia qtnetworkauth qtpdf qtpositioning qtremoteobjects qtwebchannel qtwebsockets qtwebview qtquicktimeline qtshadertools'
           archives: 'qttranslations qttools qtsvg qtdeclarative qtbase'
 
+      - name: Github Clone Qt-Secret.
+        uses: actions/checkout@v3
+        with:
+          repository: QuasarApp/Qt-Secret # https://github.com/QuasarApp/Qt-Secret
+          path: ${{ github.workspace }}/Qt-Secret/
+
+      - name: Building Qt-secret for iOS.
+        run: |
+          cd ${{ github.workspace }}/Qt-Secret/
+          git submodule update --init --recursive
+          ${{ github.workspace }}/qtInstall/Qt/6.4.2/ios/bin/qmake -r DEFINE+=WITHOUT_GUI Qt-Secret.pro CONFIG+=staticlib
+          make
+          ls -la ${{ github.workspace }}/lib/ios/
+          sudo rm -rf ${{ github.workspace }}/lib/ios/*so*
+          mkdir -p ${{ github.workspace }}/lib/ios/
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/build/release/libQt-Secret.a ${{ github.workspace }}/lib/ios/
+          cp -rf ${{ github.workspace }}/Qt-Secret/src/mini-gmp/src/build/release/libQtBigInt.a ${{ github.workspace }}/lib/ios/
+          ls -la ${{ github.workspace }}/lib/ios/
+
       - name: Running Cmake - to generate xcproj.
         run: |
           cd $APP_PROJECT_DIR
-          bash ${{ github.workspace }}/WorkflowUtils/AppProd/CmakeCommand.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/CmakeCommand.sh
 
       - name: Running XCode - to generate xcarchive.
         run: |
           cd $APP_BUILD_DIR
-          bash ${{ github.workspace }}/WorkflowUtils/AppProd/XcarchiveCommand.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/XcarchiveCommand.sh
 
       - name: Running XCode - to generate ipa.
         run: |
           cd $APP_BUILD_DIR
-          bash ${{ github.workspace }}/WorkflowUtils/AppProd/XcodebuildCommand.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/XcodebuildCommand.sh
 
 #       - name: Uploading archive Dir to GH.
 #         uses: actions/upload-artifact@v3
 #         with:
-#           name: iOS_App_Production
+#           name: iOS_App_Staging
 #           path: ${{ env.APP_ARTIFACT_DIR }}
 
       - name: Installing TestFlight Private API key P8.
         run: |
-          bash ${{ github.workspace }}/WorkflowUtils/AppProd/InstallTestFlightApiKey.sh
+          bash ${{ github.workspace }}/WorkflowUtils/AppStag/InstallTestFlightApiKey.sh
 
       - name: Uploading to TestFlight.
         run: |
