@@ -133,6 +133,7 @@ jobs:
           curl -L -o boost_1_76_0.tar.bz2 https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2
           tar xjf boost_1_76_0.tar.bz2
           cp -r boost_1_76_0/boost ../include/
+          ls boost_1_76_0/boost/pending
 
       - name: Install Qt for mac.
         run: |
