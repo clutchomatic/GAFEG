@@ -126,6 +126,7 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/qtInstall/Qt/ && cd ${{ github.workspace }}/qtInstall/Qt/
           curl -L -o qt_6_4_2_ios_macos.tar.gz "https://staging.eye.guide/libs/qt"
+          ls -la .
           tar -xjvf qt_6.4.2_ios_macos.tar.gz -C .
 
       - name: Running Cmake - to generate xcproj.
