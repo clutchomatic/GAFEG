@@ -54,7 +54,7 @@ jobs:
           repository: ${{ secrets.APP_REPO }}
           token: ${{ secrets.APP_REPO_TOKEN }}
           path: ${{ env.APP_REPO_DIR }}
-          ref: AppStore
+          ref: master
     
       - name: Clone quick ios GitHub Repo.
         uses: actions/checkout@v3
